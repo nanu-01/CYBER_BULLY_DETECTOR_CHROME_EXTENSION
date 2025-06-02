@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Cyberbullying Detection",
+  "version": "1.0",
+  "description": "Detect cyberbullying in web pages",
+  "permissions": ["activeTab"],
+  "host_permissions": ["http://localhost:5000/"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.jpeg",
+      "48": "icon.jpeg",
+      "128": "icon.jpeg"
+    }
+  }
+}

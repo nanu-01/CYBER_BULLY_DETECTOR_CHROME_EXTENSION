@@ -1,0 +1,9 @@
+flask
+requests
+flask-cors
+torch
+transformers
+scikit-learn
+pandas
+fastapi
+uvicorn
