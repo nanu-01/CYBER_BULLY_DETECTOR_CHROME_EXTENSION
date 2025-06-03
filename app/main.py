@@ -16,7 +16,7 @@ app.add_middleware(
 
 # Load the pipeline (getting raw logits for multi-label processing)
 model_id = "anu111222/cyberbully-detector"
-text_classifier = pipeline("text-classification", model=model_id, return_tensors=True)
+text_classifier = pipeline("text-classification", model=model_id)
 
 @app.get("/")
 def read_root():
