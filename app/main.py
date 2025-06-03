@@ -33,7 +33,7 @@ async def predict(request: Request):
     predictions = text_classifier(text, truncation=True)
 
     # Extract labels based on confidence threshold
-    threshold = 0.5
+    threshold = 0.4
     predicted_labels = [
         pred["label"]
         for pred in predictions
