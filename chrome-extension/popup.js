@@ -18,10 +18,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const data = await response.json();
 
-            document.getElementById("result").innerText =
-                data.predicted_labels.includes("Safe")
-                    ? "✅ Safe comment!"
-                    : "🚨 Toxic: " + data.predicted_labels.join(", ");
+            // Modify result display logic
+            if (data.predicted_labels.length === 0) {
+                document.getElementById("result").innerText = "✅ This comment seems safe!";
+            } else {
+                document.getElementById("result").innerText =
+                    "🚨 Detected: " + data.predicted_labels.join(", ");
+            }
         } catch (error) {
             console.error("Error contacting backend:", error);
             document.getElementById("result").innerText = "❌ Error connecting to server.";

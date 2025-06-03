@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Detect cyberbullying in web pages",
   "permissions": ["activeTab"],
-  "host_permissions": ["http://localhost:5000/"],
+  "host_permissions": ["http://localhost:8000/"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
