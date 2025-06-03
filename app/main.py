@@ -1,22 +1,30 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
 app = FastAPI()
 
-# Enable CORS for Chrome Extension access
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict this in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load the pipeline (getting raw logits for multi-label processing)
+# Load tokenizer & model manually
 model_id = "anu111222/cyberbully-detector"
-text_classifier = pipeline("text-classification", model=model_id)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForSequenceClassification.from_pretrained(model_id)
+model.eval()
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+# Get label mapping
+id2label = model.config.id2label  # Example: {0: "toxic", 1: "insult", ...}
 
 @app.get("/")
 def read_root():
@@ -30,18 +38,19 @@ async def predict(request: Request):
     if not text.strip():
         return {"error": "No text provided"}
 
-    # Get model output (raw logits)
-    output = text_classifier(text)
-    logits = output[0]["logits"]
+    # Tokenize input
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
 
-    # Apply sigmoid activation for multi-label classification
-    probs = torch.sigmoid(torch.tensor(logits)).tolist()
+    # Get raw model output
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits
+        probs = torch.sigmoid(logits).squeeze().cpu().tolist()  # Apply sigmoid
 
-    # Get label mapping if available
-    id2label = text_classifier.model.config.id2label  # Example: {0: "toxic", 1: "insult", ...}
-
-    # Apply threshold to determine toxic categories
+    # Apply threshold
     threshold = 0.5
-    predicted_labels = [id2label[i] for i, p in enumerate(probs) if p >= threshold]
+    predicted_labels = [
+        id2label[i] for i, p in enumerate(probs) if p >= threshold
+    ]
 
     return {"predicted_labels": predicted_labels}
